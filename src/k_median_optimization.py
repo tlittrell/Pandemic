@@ -5,7 +5,8 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
 
-def optimize_station_placement(game_graph, max_facilities):
+# noinspection PyCallingNonCallable
+def optimize_station_placement(game_graph, max_facilities, require_atlanta=True):
     cities = list(game_graph.nodes)
 
     m = ConcreteModel()
@@ -20,12 +21,16 @@ def optimize_station_placement(game_graph, max_facilities):
 
     # can only assign a city to a research station if that station is active
     def assign_only_if_active(model, possible_facility, city):
-        return m.x[possible_facility, city] <= m.y[possible_facility]
+        return model.x[possible_facility, city] <= m.y[possible_facility]
 
     m.active_facilities_only = Constraint(cities, cities, rule=assign_only_if_active)
 
     # limit the number of facilities
     m.max_facilities = Constraint(expr=sum(m.y[possible_facility] for possible_facility in cities) <= max_facilities)
+
+    # Atlanta is the default station
+    if require_atlanta:
+        m.put_station_in_atlanta = Constraint(expr=m.y['Atlanta'] == 1)
 
     # objective function
     m.obj = Objective(sense=minimize, expr=sum(
