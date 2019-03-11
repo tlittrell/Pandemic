@@ -28,7 +28,7 @@ def optimize_station_placement(game_graph, max_facilities):
     m.max_facilities = Constraint(expr=sum(m.y[possible_facility] for possible_facility in cities) <= max_facilities)
 
     # objective function
-    m.objective = Objective(sense=minimize, expr=sum(
+    m.obj = Objective(sense=minimize, expr=sum(
         nx.shortest_path_length(game_graph, source=possible_facility, target=city) * m.x[possible_facility, city] for
         possible_facility in cities for city in cities))
 
