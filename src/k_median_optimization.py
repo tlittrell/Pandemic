@@ -3,9 +3,11 @@ from collections import namedtuple
 import networkx as nx
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
+from dpcontracts import require, types
 
 
-# noinspection PyCallingNonCallable
+@require("max_facilities must be positive", lambda args: args.max_facilities > 0)
+@types(game_graph=nx.classes.graph.Graph, max_facilities=int, require_atlanta=bool)
 def optimize_station_placement(game_graph, max_facilities, require_atlanta=True):
     cities = list(game_graph.nodes)
 
